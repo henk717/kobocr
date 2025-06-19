@@ -15,7 +15,7 @@ def write_config():
     config.write(open('config.cfg', 'w'))
 
 if not os.path.exists('config.cfg'):
-    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'input_folder': 'input', 'output_folder': 'output'}
+    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'input_folder': 'input', 'output_folder': 'output', 'text_prefix': 'Verbatim text: ', 'max_output_size': '512'}
     write_config()
     if not os.path.exists("input"): 
         os.makedirs("input")
@@ -26,10 +26,11 @@ config.read_file(open(r'config.cfg'))
 ENDPOINT = config.get('config', 'kcpp_url')
 input_folder = config.get('config', 'input_folder')
 output_path = config.get('config', 'output_folder')
+text_prefix = config.get('config', 'text_prefix')
 
 if not os.path.exists("prompt.txt"): 
     with open("prompt.txt", 'w', encoding='utf-8') as file:
-        file.write("Output only the text in the image.")
+        file.write("Output only the text in the image without wrapping it in quotes.")
 
 
 class NewFileHandler(FileSystemEventHandler):
@@ -44,7 +45,7 @@ def ai_processing(base64, input_filename):
     with open("prompt.txt", "r", encoding="utf-8") as prompt_file:
         prompt = prompt_file.read().replace('\n', '')
         input_json = {
-            "prompt": f"{{[INPUT]}}{prompt}{{[OUTPUT]}}",
+            "prompt": f"{{[INPUT]}}{prompt}{{[OUTPUT]}}{text_prefix}",
             "images": [base64],
             "max_context_length": 8192, # How much of the prompt will we submit to the AI generator? (Prevents AI / memory overloading)
             "max_length": 512, # How long should the response be?
@@ -59,6 +60,7 @@ def ai_processing(base64, input_filename):
             text = results[0]['text']
             response_text = text.split('\n')[0].replace("  ", " ")
             print(text)
+            input_filename = input_filename + '.txt'
             with open(os.path.join(output_path, input_filename), 'w', encoding='utf-8') as file:
                 file.write(text)
         else:
