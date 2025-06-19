@@ -32,7 +32,7 @@ class NewFileHandler(FileSystemEventHandler):
 
                # Print command (varies slightly by platform)
                if os.name == 'nt':  # Windows
-                    subprocess.run([(os.path.join(basepath, "PDFtoPrinter.exe")), filename])
+                    subprocess.run([(os.path.join(basepath, "PDFtoPrinter.exe")), (os.path.join(os.getcwd(), filename))])
                else:  # macOS or Linux
                     os.system(f"lp {filename}")
 
