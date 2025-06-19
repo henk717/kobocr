@@ -59,7 +59,7 @@ def ai_processing(base64, input_filename):
             "max_length": max_output_size, # How long should the response be?
             "rep_pen": rep_pen, # Increase if its looping
             "temperature": temperature, # Low for focused AI, high for creative AI
-            "replace_instruct_placeholders": "True", # Make the placeholders work in all formats
+            "replace_instruct_placeholders": True, # Make the placeholders work in all formats
             "quiet": "False" # Don't print what you are doing in the KoboldAI console, helps with user privacy
         }
         print(input_json)
@@ -86,5 +86,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        pass
+        observer.stop()
     observer.join()
