@@ -15,17 +15,17 @@ def write_config():
     config.write(open('config.cfg', 'w'))
 
 if not os.path.exists('config.cfg'):
-    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'path_to_watch': 'input'}
+    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'input_folder': 'input', 'output_folder': 'output'}
     write_config()
     if not os.path.exists("input"): 
         os.makedirs("input")
+    if not os.path.exists("output"): 
+        os.makedirs("output") 
 
 config.read_file(open(r'config.cfg'))
 ENDPOINT = config.get('config', 'kcpp_url')
-path_to_watch = config.get('config', 'path_to_watch')
-
-if not os.path.exists("output"): 
-    os.makedirs("output") 
+input_folder = config.get('config', 'input_folder')
+output_path = config.get('config', 'output_folder')
 
 if not os.path.exists("prompt.txt"): 
     with open("prompt.txt", 'w', encoding='utf-8') as file:
@@ -59,7 +59,7 @@ def ai_processing(base64, input_filename):
             text = results[0]['text']
             response_text = text.split('\n')[0].replace("  ", " ")
             print(text)
-            with open(os.path.join(os.path.curdir, 'output', input_filename), 'w', encoding='utf-8') as file:
+            with open(os.path.join(output_path, input_filename), 'w', encoding='utf-8') as file:
                 file.write(text)
         else:
             print(response)
@@ -67,11 +67,11 @@ def ai_processing(base64, input_filename):
 if __name__ == "__main__":
     event_handler = NewFileHandler()
     observer = Observer()
-    observer.schedule(event_handler, path=path_to_watch, recursive=False)
+    observer.schedule(event_handler, path=input_folder, recursive=False)
     observer.start()
 
     try:
-        print(f"Watching for new image files in: {path_to_watch}")
+        print(f"Watching for new image files in: {input_folder}")
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
