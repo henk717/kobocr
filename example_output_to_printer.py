@@ -17,24 +17,29 @@ pdfmetrics.registerFont(TTFont('input_font', 'font.ttf'))
 input_folder = "output"
 
 class NewFileHandler(FileSystemEventHandler):
-     def on_created(self, event):
-          with open(event.src_path, "r", encoding="utf-8") as file_to_print:
-               print_text = file_to_print.read().replace('\n', '')
-               # Create a PDF
-               filename = "output.pdf"
-               doc = SimpleDocTemplate(filename, pagesize=A4)
-               styles = getSampleStyleSheet()
-               style = styles["Normal"]
-               style.fontName = "input_font"
-               style.fontSize = 20
-               paragraph = Paragraph(print_text, style)
-               doc.build([paragraph])
+          def on_created(self, event):
+               while True:
+                    try:
+                         with open(event.src_path, "r", encoding="utf-8") as file_to_print:
+                              print_text = file_to_print.read().replace('\n', '')
+                              # Create a PDF
+                              filename = "output.pdf"
+                              doc = SimpleDocTemplate(filename, pagesize=A4)
+                              styles = getSampleStyleSheet()
+                              style = styles["Normal"]
+                              style.fontName = "input_font"
+                              style.fontSize = 20
+                              paragraph = Paragraph(print_text, style)
+                              doc.build([paragraph])
 
-               # Print command (varies slightly by platform)
-               if os.name == 'nt':  # Windows
-                    subprocess.run([(os.path.join(basepath, "PDFtoPrinter.exe")), (os.path.join(os.getcwd(), filename))])
-               else:  # macOS or Linux
-                    os.system(f"lp {filename}")
+                              # Print command (varies slightly by platform)
+                              if os.name == 'nt':  # Windows
+                                   subprocess.run([(os.path.join(basepath, "PDFtoPrinter.exe")), (os.path.join(os.getcwd(), filename))])
+                              else:  # macOS or Linux
+                                   os.system(f"lp {filename}")
+                              break
+                    except:
+                         time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -48,5 +53,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        observer.stop()
+        pass
     observer.join()

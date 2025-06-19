@@ -15,7 +15,7 @@ def write_config():
     config.write(open('config.cfg', 'w'))
 
 if not os.path.exists('config.cfg'):
-    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'input_folder': 'input', 'output_folder': 'output', 'text_prefix': 'Verbatim text: ', 'max_output_size': '512', 'temperature': '0.1'}
+    config['config'] = {'kcpp_url': 'http://127.0.0.1:5001', 'input_folder': 'input', 'output_folder': 'output', 'text_prefix': 'Verbatim text: ', 'max_output_size': '512', 'temperature': '0.1', 'rep_pen': '1.03'}
     write_config()
     if not os.path.exists("input"): 
         os.makedirs("input")
@@ -29,6 +29,7 @@ output_path = config.get('config', 'output_folder')
 text_prefix = config.get('config', 'text_prefix')
 max_output_size = config.get('config', 'max_output_size')
 temperature = config.get('config', 'temperature')
+rep_pen = config.get('config', 'rep_pen')
 
 if not os.path.exists("prompt.txt"): 
     with open("prompt.txt", 'w', encoding='utf-8') as file:
@@ -37,11 +38,16 @@ if not os.path.exists("prompt.txt"):
 
 class NewFileHandler(FileSystemEventHandler):
     def on_created(self, event):
-        if not event.is_directory and event.src_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-            with open(event.src_path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                input_filename = os.path.splitext(os.path.basename(event.src_path))[0]
-                ai_processing(encoded_string, input_filename)
+        while True:
+            try:
+                if not event.is_directory and event.src_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                    with open(event.src_path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                        input_filename = os.path.splitext(os.path.basename(event.src_path))[0]
+                        ai_processing(encoded_string, input_filename)
+                        break
+            except:
+                time.sleep(1)
 
 def ai_processing(base64, input_filename):
     with open("prompt.txt", "r", encoding="utf-8") as prompt_file:
@@ -51,6 +57,7 @@ def ai_processing(base64, input_filename):
             "images": [base64],
             "max_context_length": 8192, # How much of the prompt will we submit to the AI generator? (Prevents AI / memory overloading)
             "max_length": max_output_size, # How long should the response be?
+            "rep_pen": rep_pen, # Increase if its looping
             "temperature": temperature, # Low for focused AI, high for creative AI
             "replace_instruct_placeholders": "True", # Make the placeholders work in all formats
             "quiet": "False" # Don't print what you are doing in the KoboldAI console, helps with user privacy
@@ -79,5 +86,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        observer.stop()
+        pass
     observer.join()
