@@ -7,10 +7,12 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 import pathlib
 import os
+import subprocess
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
 
+basepath = os.path.abspath(os.path.dirname(__file__))
 pdfmetrics.registerFont(TTFont('input_font', 'font.ttf'))
 input_folder = "output"
 
@@ -30,7 +32,7 @@ class NewFileHandler(FileSystemEventHandler):
 
                # Print command (varies slightly by platform)
                if os.name == 'nt':  # Windows
-                    os.system(f"PDFtoPrinter {filename}")
+                    subprocess.run([(os.path.join(basepath, "PDFtoPrinter.exe")), filename])
                else:  # macOS or Linux
                     os.system(f"lp {filename}")
 
