@@ -27,6 +27,7 @@ ENDPOINT = config.get('config', 'kcpp_url')
 input_folder = config.get('config', 'input_folder')
 output_path = config.get('config', 'output_folder')
 text_prefix = config.get('config', 'text_prefix')
+max_output_size = config.get('config', 'max_output_size')
 
 if not os.path.exists("prompt.txt"): 
     with open("prompt.txt", 'w', encoding='utf-8') as file:
@@ -48,7 +49,7 @@ def ai_processing(base64, input_filename):
             "prompt": f"{{[INPUT]}}{prompt}{{[OUTPUT]}}{text_prefix}",
             "images": [base64],
             "max_context_length": 8192, # How much of the prompt will we submit to the AI generator? (Prevents AI / memory overloading)
-            "max_length": 512, # How long should the response be?
+            "max_length": max_output_size, # How long should the response be?
             "temperature": 0.1, # Make it focused 
             "replace_instruct_placeholders": "True", # Make the placeholders work in all formats
             "quiet": "False" # Don't print what you are doing in the KoboldAI console, helps with user privacy
